@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Physio Knowledge Hub - Login</title>
+
+<style>
+body{
+  font-family: Arial;
+  background:#f4f7fb;
+  text-align:center;
+  padding-top:100px;
+}
+.container{
+  background:white;
+  width:350px;
+  margin:auto;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+input{
+  width:90%;
+  padding:10px;
+  margin:10px 0;
+}
+button{
+  padding:10px 20px;
+  background:#1a237e;
+  color:white;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+button:hover{
+  background:#3949ab;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<h2>Physio Knowledge Hub</h2>
+
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAyQWphWzWz10vy-gQz4fq517ChU2MJtUc",
+  authDomain: "physio-knowledge-hub.firebaseapp.com",
+  projectId: "physio-knowledge-hub",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.login = async function(){
+
+ const email = document.getElementById("email").value;
+ const password = document.getElementById("password").value;
+
+ try{
+   const userCredential = await signInWithEmailAndPassword(auth,email,password);
+   const user = userCredential.user;
+
+   const docRef = doc(db,"users",user.uid);
+   const docSnap = await getDoc(docRef);
+
+   if(!docSnap.exists()) return;
+
+   const data = docSnap.data();
+
+   if(!data.approved){
+     alert("Waiting for Admin Approval");
+     return;
+   }
+
+   if(data.role === "admin"){
+     window.location.href="admin.html";
+   }else{
+     window.location.href="dashboard.html";
+   }
+
+ }catch(e){
+   alert("Login Failed");
+ }
+
+}
+
+</script>
+
+</body>
+</html>
